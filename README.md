@@ -10,8 +10,8 @@ cd TriLib
 mkdir build/win64
 cd build/win64
 
-cmake ../.. -G "UnixMakefiles"
+cmake ../.. -G "<INSERT_BUILDSYSTEM_HERE>"
 make
 ```
 
-Make sure to install ``cmake,make,gpp`` for this to work.
+Make sure to install ``cmake,make,gcc`` for this to work.
