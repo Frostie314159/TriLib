@@ -1,9 +1,8 @@
 #include <iostream>
-#include <xmmintrin.h>
+
+#include "TriLib/vector/Vector.hpp"
 
 int main(){
-    __m128d m_sse = _mm_set_pd(0.1,0.2);
-    __m128d m_result = _mm_add_pd(m_sse,m_sse);
-    std::cout << m_result[1] << " " << m_result[0] << std::endl;
-    std::cout << 0.1 + 0.1 << " " << 0.2 + 0.2 << std::endl;
+    tl::vec4<float> m_vec = tl::vec4<float>{2,0,1.55556f,10};
+    std::cout << (m_vec / tl::vec4<float>{0,3,4,20}).toString() << std::endl;
 }
