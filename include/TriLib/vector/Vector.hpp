@@ -24,7 +24,7 @@ namespace tl{
 
     };
 
-    template<class _FloatType> requires std::is_floating_point_v<_FloatType>
+    template<class _FloatType> requires std::is_floating_point<_FloatType>::value
     struct vec1: public vec{
     private:
         _FloatType m_x;
@@ -57,7 +57,7 @@ namespace tl{
         }
     };
 
-    template<class _FloatType> requires std::is_floating_point_v<_FloatType>
+    template<class _FloatType> requires std::is_floating_point<_FloatType>::value
     struct vec2: public vec{
     private:
         _FloatType m_x, m_y;
@@ -104,7 +104,7 @@ namespace tl{
         }
     };
     
-    template<class _FloatType> requires std::is_floating_point_v<_FloatType>
+    template<class _FloatType> requires std::is_floating_point<_FloatType>::value
     struct vec3: public vec{
     private:
         _FloatType m_x, m_y, m_z;
@@ -181,7 +181,7 @@ namespace tl{
         }
     };
     
-    template<class _FloatType> requires std::is_floating_point_v<_FloatType>
+    template<class _FloatType> requires std::is_floating_point<_FloatType>::value
     struct vec4: public vec{
     private:
         _FloatType m_x, m_y, m_z, m_w;
