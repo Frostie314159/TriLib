@@ -1,15 +1,17 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.13)
 
 project(TriLibTests)
 
-add_executable(TriLibTests Tests.cpp)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindSSE.cmake)
+
+add_executable(TriLibTests ${CMAKE_CURRENT_SOURCE_DIR}/Tests.cpp)
 
 if(MSVC)
-    target_compile_options(TriLibTests INTERFACE /arch:SSE3)
     target_compile_options(TriLibTests PUBLIC /Wall)
 else()
-    target_compile_options(TriLibTests PUBLIC -mavx -pedantic -fconcepts)
+    target_compile_options(TriLibTests PUBLIC -msse2 -pedantic -fconcepts)
 endif()
+
 
 target_include_directories(TriLibTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

@@ -15,3 +15,7 @@ make
 ```
 
 Make sure to install ``cmake,make,gcc`` for this to work.
+
+Credits
+-------
+https://gist.github.com/hideo55/5642892 is used to check wether SSE2 is supported on the host system
