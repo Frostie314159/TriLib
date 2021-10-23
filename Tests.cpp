@@ -3,8 +3,7 @@
 #include "TriLib/vector/Vector.hpp"
 
 int main(){
-    tl::vec2<double> t_vec = tl::vec2<double>{2};
-    tl::vec2<double> t_vec2 = tl::vec2<double>{3,1};
-    std::cout << t_vec.normalize().dot(t_vec2.normalize()) << std::endl;
+    tl::vec1<double> m_vec = static_cast<tl::vec1<double>>(tl::vec1<int>(1));
+    
     return 0;
 }
