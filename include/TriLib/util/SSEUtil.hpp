@@ -27,7 +27,9 @@ namespace tl::detail{
     }__m256d_wrapper;
 #endif
     template<typename T>
-    using RegisterType = std::conditional<std::is_same<__m64_wrapper, T>::value, int, std::conditional<std::is_same<__m128_wrapper, T>::value, float, std::conditional<std::is_same<__m128d_wrapper, T>::value, double, long>>>;
+    using PrimitveRegisterType = std::conditional<std::is_same<__m64_wrapper, T>::value, int, std::conditional<std::is_same<__m128_wrapper, T>::value, float, std::conditional<std::is_same<__m128d_wrapper, T>::value, double, long>>>;
+    template<typename T>
+    using RegisterType = std::conditional<std::is_same<int, T>::value, __m64_wrapper, std::conditional<std::is_same<float, T>::value, __m128_wrapper, std::conditional<std::is_same<double, T>::value, __m128d_wrapper, __m128i_wrapper>>>;
 }
 
 #endif
