@@ -9,7 +9,7 @@ add_executable(TriLibTests ${CMAKE_CURRENT_SOURCE_DIR}/Tests.cpp)
 if(MSVC)
     target_compile_options(TriLibTests PUBLIC )
 else()
-    target_compile_options(TriLibTests PUBLIC -march=native -std=c++2a -pedantic)
+    target_compile_options(TriLibTests PUBLIC -mavx -std=c++2a -pedantic)
 endif()
 
 

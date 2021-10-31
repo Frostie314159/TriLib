@@ -30,19 +30,19 @@ namespace tl{
 
 ARITHMETIC_TEMPLATE(_VectorType)
 std::ostream& operator<<(std::ostream& t_ostream, tl::internal::_vec1<_VectorType>& t_vector){
-    return t_ostream << t_vector.to_string();
+    return t_ostream << t_vector.toString();
 }
 ARITHMETIC_TEMPLATE(_VectorType)
 std::ostream& operator<<(std::ostream& t_ostream, tl::internal::_vec2<_VectorType>& t_vector){
-    return t_ostream << t_vector.to_string();
+    return t_ostream << t_vector.toString();
 }
 ARITHMETIC_TEMPLATE(_VectorType)
 std::ostream& operator<<(std::ostream& t_ostream, tl::internal::_vec3<_VectorType>& t_vector){
-    return t_ostream << t_vector.to_string();
+    return t_ostream << t_vector.toString();
 }
 ARITHMETIC_TEMPLATE(_VectorType)
 std::ostream& operator<<(std::ostream& t_ostream, tl::internal::_vec4<_VectorType>& t_vector){
-    return t_ostream << t_vector.to_string();
+    return t_ostream << t_vector.toString();
 }
 
 #endif

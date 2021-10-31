@@ -10,7 +10,7 @@
 #include "TriLib/util/TemplateUtil.hpp"
 
 #include "Base_Vector.hpp"
-namespace tl::internal{
+BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been available since c++17
     using std::string_literals::operator""s;
 
     ARITHMETIC_TEMPLATE(_ArithmeticType)
@@ -24,50 +24,318 @@ namespace tl::internal{
         ~_vec3(){}
         
 
-        //Operator overloading is SSE optimized
+        //Operator overloading is SSE/AVX optimized
 #ifdef __AVX__
-        static inline __m256d loadToAVXRegister(_vec3<double> t_vector){
-            return _mm256_setr_pd(t_vector.x, t_vector.y, t_vector.z, 0);
+        static inline tl::detail::__m128i_wrapper loadToSSERegister(_vec3<int> t_vector){
+            return tl::detail::__m128i_wrapper{_mm_setr_epi32(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        static inline __m256d loadToAVXRegister(_vec3<float> t_vector){
-            return _mm256_setr_pd(t_vector.x, t_vector.y, t_vector.z, 0);
+        static inline tl::detail::__m128_wrapper loadToSSERegister(_vec3<float> t_vector){
+            return tl::detail::__m128_wrapper{_mm_setr_ps(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        static inline _vec3 loadTo_vec3(__m256d t_avxRegister){
-            return _vec3(t_avxRegister[0], t_avxRegister[1], t_avxRegister[2]);
+        static inline tl::detail::__m256i_wrapper loadToAVXRegister(_vec3<long> t_vector){
+            return tl::detail::__m256i_wrapper{_mm256_setr_epi64x(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        _vec3 operator+(_vec3 t_other){
-            return loadTo_vec3(_mm256_add_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+        static inline tl::detail::__m256d_wrapper loadToSSERegister(_vec3<double> t_vector){
+            return tl::detail::__m256d_wrapper{_mm256_setr_pd(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        _vec3 operator-(_vec3 t_other){
-            return loadTo_vec3(_mm256_sub_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+        
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator+(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_add_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm256_add_epi64(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm256_add_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm256_add_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_add_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_add_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm256_add_epi64(loadToAVXRegister(*this), loadToAVXRegister(static_cast<_vec3<long>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_add_epi64(loadToAVXRegister(static_cast<_vec3<long>>(*this)), loadToAVXRegister(t_other)));
+                    }
+                }
+            }
         }
-        _vec3 operator*(_vec3 t_other){
-            return loadTo_vec3(_mm256_mul_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator-(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_sub_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm256_sub_epi64(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm256_sub_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm256_sub_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_sub_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_sub_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm256_sub_epi64(loadToAVXRegister(*this), loadToAVXRegister(static_cast<_vec3<long>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_sub_epi64(loadToAVXRegister(static_cast<_vec3<long>>(*this)), loadToAVXRegister(t_other)));
+                    }
+                }
+            }
         }
-        _vec3 operator/(_vec3 t_other){
-            return loadTo_vec3(_mm256_div_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator*(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_mul_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm256_mul_epi64(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm256_mul_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm256_mul_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_mul_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_mul_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm256_mul_epi64(loadToAVXRegister(*this), loadToAVXRegister(static_cast<_vec3<long>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_mul_epi64(loadToAVXRegister(static_cast<_vec3<long>>(*this)), loadToAVXRegister(t_other)));
+                    }
+                }
+            }
+        }
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator/(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_div_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm256_div_epi64(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm256_div_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm256_div_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_div_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_div_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm256_div_epi64(loadToAVXRegister(*this), loadToAVXRegister(static_cast<_vec3<long>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm256_div_epi64(loadToAVXRegister(static_cast<_vec3<long>>(*this)), loadToAVXRegister(t_other)));
+                    }
+                }
+            }
         }
 #elif defined(__SSE2__)
-        static inline __m128d loadToSSERegister(_vec3<double> t_vector){
-            return _mm_setr_pd(t_vector.x, t_vector.y);
+        static inline tl::detail::__m128i_wrapper loadToSSERegister(_vec3<int> t_vector){
+            return tl::detail::__m128i_wrapper{_mm_setr_epi32(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        static inline __m128d loadToSSERegister(_vec3<float> t_vector){
-            return _mm_setr_pd(t_vector.x, t_vector.y);
+        static inline tl::detail::__m128i_wrapper loadToSSERegister(_vec3<long> t_vector){
+            return tl::detail::__m128i_wrapper{_mm_setr_epi64(reinterpret_cast<__m64>(t_vector.x), reinterpret_cast<__m64>(t_vector.y))};
         }
-        static inline _vec3 loadTo_vec3(__m128d t_sseRegister, double t_z){
-            return _vec3(t_sseRegister[0], t_sseRegister[1], t_z);
+        static inline tl::detail::__m128_wrapper loadToSSERegister(_vec3<float> t_vector){
+            return tl::detail::__m128_wrapper{_mm_setr_ps(t_vector.x, t_vector.y, t_vector.z, 0)};
         }
-        _vec3 operator+(_vec3 t_other){
-            return loadTo_vec3(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z + t_other.z);
+        static inline tl::detail::__m128d_wrapper loadToSSERegister(_vec3<double> t_vector){
+            return tl::detail::__m128d_wrapper{_mm_setr_pd(t_vector.x, t_vector.y)};
         }
-        _vec3 operator-(_vec3 t_other){
-            return loadTo_vec3(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z - t_other.z);
+        static inline _vec3<int32_t> loadToVec3(__m128i t_sseRegister){
+            return _vec3<int32_t>(t_sseRegister[0], t_sseRegister[1], t_sseRegister[2]);
         }
-        _vec3 operator*(_vec3 t_other){
-            return loadTo_vec3(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z * t_other.z);
+        static inline _vec3<int64_t> loadToVec3(__m128i t_sseRegister, int64_t t_z){
+            return _vec3<int64_t>(t_sseRegister[0], t_sseRegister[1], t_z);
         }
-        _vec3 operator/(_vec3 t_other){
-            return loadTo_vec3(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z / t_other.z);
+        static inline _vec3<float_t> loadToVec3(__m128 t_sseRegister){
+            return _vec3<float_t>(t_sseRegister[0], t_sseRegister[1], t_sseRegister[2]);
+        }
+        static inline _vec3<double_t> loadToVec3(__m128d t_sseRegister, double_t t_z){
+            return _vec3<double_t>(t_sseRegister[0], t_sseRegister[1], t_z);
+        }
+
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator+(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_add_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm_add_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z + t_other.z);
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z + t_other.z);
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))), this->z + t_other.z);
+                    }else{
+                        return loadToVec3(_mm_add_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)), this->z + t_other.z);
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_add_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm_add_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<long>>(t_other))), this->z + t_other.z);
+                    }else{
+                        return loadToVec3(_mm_add_epi64(loadToSSERegister(static_cast<_vec3<long>>(*this)), loadToSSERegister(t_other)), this->z + t_other.z);
+                    }
+                }
+            }
+        }
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator-(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_sub_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm_sub_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z - t_other.z);
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z - t_other.z);
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))), this->z - t_other.z);
+                    }else{
+                        return loadToVec3(_mm_sub_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)), this->z - t_other.z);
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_sub_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm_sub_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<long>>(t_other))), this->z - t_other.z);
+                    }else{
+                        return loadToVec3(_mm_sub_epi64(loadToSSERegister(static_cast<_vec3<long>>(*this)), loadToSSERegister(t_other)), this->z - t_other.z);
+                    }
+                }
+            }
+        }
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator*(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_mul_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm_mul_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z * t_other.z);
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z * t_other.z);
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))), this->z * t_other.z);
+                    }else{
+                        return loadToVec3(_mm_mul_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)), this->z * t_other.z);
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_mul_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm_mul_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<long>>(t_other))), this->z * t_other.z);
+                    }else{
+                        return loadToVec3(_mm_mul_epi64(loadToSSERegister(static_cast<_vec3<long>>(*this)), loadToSSERegister(t_other)), this->z * t_other.z);
+                    }
+                }
+            }
+        }
+        ARITHMETIC_TEMPLATE(_VectorType)
+        _vec3 operator/(_vec3<_VectorType> t_other){
+            if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
+                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                    return loadToVec3(_mm_div_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                    return loadToVec3(_mm_div_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z / t_other.z);
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                    return loadToVec3(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
+                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                    return loadToVec3(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(t_other)), this->z / t_other.z);
+                }
+            }else{
+                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double>::value){
+                        return loadToVec3(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<double>>(t_other))), this->z / t_other.z);
+                    }else{
+                        return loadToVec3(_mm_div_pd(loadToSSERegister(static_cast<_vec3<double>>(*this)), loadToSSERegister(t_other)), this->z / t_other.z);
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float>::value){
+                        return loadToVec3(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<float>>(t_other))));
+                    }else{
+                        return loadToVec3(_mm_div_ps(loadToSSERegister(static_cast<_vec3<float>>(*this)), loadToSSERegister(t_other)));
+                    }
+                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
+                    if constexpr(std::is_same<_ArithmeticType, long>::value){
+                        return loadToVec3(_mm_div_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec3<long>>(t_other))), this->z / t_other.z);
+                    }else{
+                        return loadToVec3(_mm_div_epi64(loadToSSERegister(static_cast<_vec3<long>>(*this)), loadToSSERegister(t_other)), this->z / t_other.z);
+                    }
+                }
+            }
         }
 #else
         _vec3 operator+(_vec3 t_other){
@@ -151,5 +419,5 @@ namespace tl::internal{
             return std::string("vec3("s + std::to_string(this->x) + ","s + std::to_string(this->y) + ","s + std::to_string(this->z) + ")"s);
         }
     };
-}
+END_NAMESPACE_INTERNAL
 #endif

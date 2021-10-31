@@ -10,7 +10,7 @@
 #include "TriLib/util/SSEUtil.hpp"
 #include "TriLib/util/TemplateUtil.hpp"
 
-namespace tl::internal{
+BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been available since c++17
     using std::string_literals::operator""s;
 
     ARITHMETIC_TEMPLATE(_ArithmeticType)
@@ -30,21 +30,21 @@ namespace tl::internal{
         static inline __m256d loadToAVXRegister(_vec4<float> t_vector){
             return _mm256_setr_pd(t_vector.x, t_vector.y, t_vector.z, t_vector.w);
         }
-        static inline _vec4 loadTo_vec4(__m256d t_avxRegister){
+        static inline _vec4 loadToVec4(__m256d t_avxRegister){
             return _vec4(t_avxRegister[0], t_avxRegister[1], t_avxRegister[2], t_avxRegister[3]);
         }
 
         _vec4 operator+(_vec4 t_other){
-            return loadTo_vec4(_mm256_add_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+            return loadToVec4(_mm256_add_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
         }
         _vec4 operator-(_vec4 t_other){
-            return loadTo_vec4(_mm256_sub_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+            return loadToVec4(_mm256_sub_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
         }
         _vec4 operator*(_vec4 t_other){
-            return loadTo_vec4(_mm256_mul_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+            return loadToVec4(_mm256_mul_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
         }
         _vec4 operator/(_vec4 t_other){
-            return loadTo_vec4(_mm256_div_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
+            return loadToVec4(_mm256_div_pd(loadToAVXRegister(*this), loadToAVXRegister(t_other)));
         }
         constexpr _ArithmeticType accumulate(){
             //manual SSE optimization
@@ -64,21 +64,21 @@ namespace tl::internal{
         static inline __m128d loadToSecondSSERegister(_vec4<float> t_vector){
             return _mm_setr_pd(t_vector.z, t_vector.w);
         }
-        static inline _vec4 loadTo_vec4(__m128d t_firstSSERegister, __m128d t_secondSSERegister){
+        static inline _vec4 loadToVec4(__m128d t_firstSSERegister, __m128d t_secondSSERegister){
             return _vec4(t_firstSSERegister[0], t_firstSSERegister[1], t_secondSSERegister[0], t_secondSSERegister[1]);
         }
 
         _vec4 operator+(_vec4 t_other){
-            return loadTo_vec4(_mm_add_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_add_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
+            return loadToVec4(_mm_add_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_add_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
         }
         _vec4 operator-(_vec4 t_other){
-            return loadTo_vec4(_mm_sub_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_sub_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
+            return loadToVec4(_mm_sub_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_sub_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
         }
         _vec4 operator*(_vec4 t_other){
-            return loadTo_vec4(_mm_mul_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_mul_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
+            return loadToVec4(_mm_mul_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_mul_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
         }
         _vec4 operator/(_vec4 t_other){
-            return loadTo_vec4(_mm_div_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_div_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
+            return loadToVec4(_mm_div_pd(loadToFirstSSERegister(*this), loadToFirstSSERegister(t_other)), _mm_div_pd(loadToSecondSSERegister(*this), loadToSecondSSERegister(t_other)));
         }
         constexpr _ArithmeticType accumulate(){
             //manual SSE optimization
@@ -99,7 +99,7 @@ namespace tl::internal{
         _vec4 operator/(_vec4 t_other){
             return _vec4(this->x / t_other.x, this->y / t_other.y, this->z / t_other.z, this->w / t_other.w);
         }
-        constexpr _FloatType accumulate(){
+        constexpr _ArithmeticType accumulate(){
             return this->x + this->y + this->z + this->w;
         }
 #endif
@@ -169,5 +169,5 @@ namespace tl::internal{
             return std::string("vec4("s + std::to_string(this->x) + ","s + std::to_string(this->y) + ","s + std::to_string(this->z) + ","s + std::to_string(this->w) + ")"s);
         }
     };
-}
+END_NAMESPACE_INTERNAL
 #endif

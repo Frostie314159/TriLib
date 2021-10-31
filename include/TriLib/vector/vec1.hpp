@@ -7,8 +7,9 @@
 
 #include "TriLib/vector/Base_Vector.hpp"
 #include "TriLib/util/TemplateUtil.hpp"
+#include "TriLib/util/NamespaceUtil.hpp"
 
-namespace tl::internal{
+BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been available since c++17
     using std::string_literals::operator""s;
     //Template used to make switching between precision levels easier.
     ARITHMETIC_TEMPLATE(_ArithmeticType)
@@ -107,9 +108,9 @@ namespace tl::internal{
         constexpr uint8_t getDepth(){
             return 1;
         }
-        inline std::string to_string(){
+        inline std::string toString(){
             return std::string("vec1("s + std::to_string(this->x) + ")"s);
         }
     };
-}
+END_NAMESPACE_INTERNAL
 #endif
