@@ -127,7 +127,7 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         const bool operator>=(const _vec4<_VectorType>& t_other){
             return this->x >= t_other.x && this->y >= t_other.y && this->z >= t_other.z && this->w >= t_other.w;
         }
-        _vec4& operator=(const _vec4& t_other){
+        _vec4 operator=(const _vec4& t_other){
             if(this != &t_other){
                 this->x = t_other.x;
                 this->y = t_other.y;
@@ -136,7 +136,7 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
                 
                 if(*this != t_other){
                     throw std::logic_error("Copy Assignment operator didn't work!");
-                    return vec4<_ArithmeticType>(0);//This will never be called because an exception was previously thrown.
+                    return _vec4<_ArithmeticType>(0);//This will never be called because an exception was previously thrown.
                 }
             }
             return *this;
@@ -156,7 +156,7 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         constexpr float dot(_vec4<_VectorType> t_other){
             return (*this * t_other).accumulate();
         }
-        constexpr _vec4<_ArithmeticType> normalize(){
+        constexpr _vec4<_ArithmeticType> normalise(){
             _ArithmeticType m_magnitude = this->getLength();
             return (*this) / _vec4<_ArithmeticType>{m_magnitude};
         }
@@ -166,7 +166,7 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
             return 4;
         }
         inline std::string toString(){
-            return std::string("vec4("s + std::to_string(this->x) + ","s + std::to_string(this->y) + ","s + std::to_string(this->z) + ","s + std::to_string(this->w) + ")"s);
+            return std::string("_vec4("s + std::to_string(this->x) + ","s + std::to_string(this->y) + ","s + std::to_string(this->z) + ","s + std::to_string(this->w) + ")"s);
         }
     };
 END_NAMESPACE_INTERNAL

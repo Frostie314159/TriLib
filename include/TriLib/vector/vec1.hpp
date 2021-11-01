@@ -24,24 +24,24 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         ~_vec1(){}
 
         //Operator overloading section
-        _vec1& operator+(const _vec1& t_other){
+        _vec1 operator+(const _vec1& t_other){
             return _vec1(this->x + t_other.x);
         }
-        _vec1& operator-(const _vec1& t_other){
+        _vec1 operator-(const _vec1& t_other){
             return _vec1(this->x - t_other.x);
         }
-        _vec1& operator*(const _vec1& t_other){
+        _vec1 operator*(const _vec1& t_other){
             return _vec1(this->x * t_other.x);
         }
-        _vec1& operator/(const _vec1& t_other){
+        _vec1 operator/(const _vec1& t_other){
             return _vec1(this->x / t_other.x);
         }
-        _vec1& operator=(const _vec1& t_other){
+        _vec1 operator=(const _vec1& t_other){
             if(this != &t_other){
                 this->x = t_other.x;
                 if(*this != t_other){
                     throw std::logic_error("Copy Assignment operator didn't work!");
-                    return vec1<_ArithmeticType>(0);
+                    return _vec1<_ArithmeticType>(0);
                 }
             }
             return *this;
@@ -109,7 +109,7 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
             return 1;
         }
         inline std::string toString(){
-            return std::string("vec1("s + std::to_string(this->x) + ")"s);
+            return std::string("_vec1("s + std::to_string(this->x) + ")"s);
         }
     };
 END_NAMESPACE_INTERNAL

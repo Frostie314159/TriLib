@@ -29,26 +29,26 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         //Operator overloading is SSE optimized
 #ifdef __SSE2__
 
-        static inline tl::detail::__m64_wrapper loadToSSERegister(_vec2<int> t_vector){
+        static inline tl::detail::__m64_wrapper loadToSSERegister(_vec2<int32_t> t_vector){
             return tl::detail::__m64_wrapper{_mm_setr_pi32(t_vector.x, t_vector.y)};
         }
-        static inline tl::detail::__m128i_wrapper loadToSSERegister(_vec2<long> t_vector){
-            return tl::detail::__m128i_wrapper{_mm_setr_epi64(reinterpret_cast<__m64>(t_vector.x), reinterpret_cast<__m64>(t_vector.y))};
-        }
-        static inline tl::detail::__m128_wrapper loadToSSERegister(_vec2<float> t_vector){
+        static inline tl::detail::__m128_wrapper loadToSSERegister(_vec2<float_t> t_vector){
             return tl::detail::__m128_wrapper{_mm_setr_ps(t_vector.x, t_vector.y, 0, 0)};
         }
-        static inline tl::detail::__m128d_wrapper loadToSSERegister(_vec2<double> t_vector){
+        static inline tl::detail::__m128i_wrapper loadToSSERegister(_vec2<int64_t> t_vector){
+            return tl::detail::__m128i_wrapper{_mm_setr_epi64(reinterpret_cast<__m64>(t_vector.x), reinterpret_cast<__m64>(t_vector.y))};
+        }
+        static inline tl::detail::__m128d_wrapper loadToSSERegister(_vec2<double_t> t_vector){
             return tl::detail::__m128d_wrapper{_mm_setr_pd(t_vector.x, t_vector.y)};
         }
         static inline _vec2<int32_t> loadToVec2(__m64 t_sseRegister){
             return _vec2<int32_t>(t_sseRegister[0], t_sseRegister[1]);
         }
-        static inline _vec2<int64_t> loadToVec2(__m128i t_sseRegister){
-            return _vec2<int64_t>(t_sseRegister[0], t_sseRegister[1]);
-        }
         static inline _vec2<float_t> loadToVec2(__m128 t_sseRegister){
             return _vec2<float_t>(t_sseRegister[0], t_sseRegister[1]);
+        }
+        static inline _vec2<int64_t> loadToVec2(__m128i t_sseRegister){
+            return _vec2<int64_t>(t_sseRegister[0], t_sseRegister[1]);
         }
         static inline _vec2<double_t> loadToVec2(__m128d t_sseRegister){
             return _vec2<double_t>(t_sseRegister[0], t_sseRegister[1]);
@@ -57,33 +57,33 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         ARITHMETIC_TEMPLATE(_VectorType)
         _vec2 operator+(_vec2<_VectorType> t_other){
             if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
-                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                if constexpr(std::is_same<_ArithmeticType, int32_t>::value){
                     return loadToVec2(_mm_add_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
                     return loadToVec2(_mm_add_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value){
                     return loadToVec2(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, double_t>::value){
                     return loadToVec2(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(t_other)));
                 }
             }else{
-                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
-                    if constexpr(std::is_same<_ArithmeticType, double>::value){
-                        return loadToVec2(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double>>(t_other))));
+                if constexpr(std::is_same<_ArithmeticType, double_t>::value || std::is_same<_VectorType, double_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double_t>::value){
+                        return loadToVec2(_mm_add_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_add_pd(loadToSSERegister(static_cast<_vec2<double>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_add_pd(loadToSSERegister(static_cast<_vec2<double_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
-                    if constexpr(std::is_same<_ArithmeticType, float>::value){
-                        return loadToVec2(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value || std::is_same<_VectorType, float_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float_t>::value){
+                        return loadToVec2(_mm_add_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_add_ps(loadToSSERegister(static_cast<_vec2<float>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_add_ps(loadToSSERegister(static_cast<_vec2<float_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
-                    if constexpr(std::is_same<_ArithmeticType, long>::value){
-                        return loadToVec2(_mm_add_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<long>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value || std::is_same<_VectorType, int64_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
+                        return loadToVec2(_mm_add_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<int64_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_add_epi64(loadToSSERegister(static_cast<_vec2<long>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_add_epi64(loadToSSERegister(static_cast<_vec2<int64_t>>(*this)), loadToSSERegister(t_other)));
                     }
                 }
             }
@@ -91,33 +91,33 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         ARITHMETIC_TEMPLATE(_VectorType)
         _vec2 operator-(_vec2<_VectorType> t_other){
             if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
-                if constexpr(std::is_same<_ArithmeticType, int>::value){
+                if constexpr(std::is_same<_ArithmeticType, int32_t>::value){
                     return loadToVec2(_mm_sub_pi32(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
                     return loadToVec2(_mm_sub_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value){
                     return loadToVec2(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, double_t>::value){
                     return loadToVec2(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(t_other)));
                 }
             }else{
-                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
-                    if constexpr(std::is_same<_ArithmeticType, double>::value){
-                        return loadToVec2(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double>>(t_other))));
+                if constexpr(std::is_same<_ArithmeticType, double_t>::value || std::is_same<_VectorType, double_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double_t>::value){
+                        return loadToVec2(_mm_sub_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_sub_pd(loadToSSERegister(static_cast<_vec2<double>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_sub_pd(loadToSSERegister(static_cast<_vec2<double_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
-                    if constexpr(std::is_same<_ArithmeticType, float>::value){
-                        return loadToVec2(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value || std::is_same<_VectorType, float_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float_t>::value){
+                        return loadToVec2(_mm_sub_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_sub_ps(loadToSSERegister(static_cast<_vec2<float>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_sub_ps(loadToSSERegister(static_cast<_vec2<float_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
-                    if constexpr(std::is_same<_ArithmeticType, long>::value){
-                        return loadToVec2(_mm_sub_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<long>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value || std::is_same<_VectorType, int64_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
+                        return loadToVec2(_mm_sub_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<int64_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_sub_epi64(loadToSSERegister(static_cast<_vec2<long>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_sub_epi64(loadToSSERegister(static_cast<_vec2<int64_t>>(*this)), loadToSSERegister(t_other)));
                     }
                 }
             }
@@ -125,33 +125,33 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         ARITHMETIC_TEMPLATE(_VectorType)
         _vec2 operator*(_vec2<_VectorType> t_other){
             if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
-                if constexpr(std::is_same<_ArithmeticType, int>::value){
-                    return _vec2<int>(this->x * t_other.x, this->y * t_other.y);
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                if constexpr(std::is_same<_ArithmeticType, int32_t>::value){
+                    return _vec2<int32_t>(this->x * t_other.x, this->y * t_other.y);
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
                     return loadToVec2(_mm_mul_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value){
                     return loadToVec2(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, double_t>::value){
                     return loadToVec2(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(t_other)));
                 }
             }else{
-                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
-                    if constexpr(std::is_same<_ArithmeticType, double>::value){
-                        return loadToVec2(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double>>(t_other))));
+                if constexpr(std::is_same<_ArithmeticType, double_t>::value || std::is_same<_VectorType, double_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double_t>::value){
+                        return loadToVec2(_mm_mul_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_mul_pd(loadToSSERegister(static_cast<_vec2<double>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_mul_pd(loadToSSERegister(static_cast<_vec2<double_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
-                    if constexpr(std::is_same<_ArithmeticType, float>::value){
-                        return loadToVec2(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value || std::is_same<_VectorType, float_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float_t>::value){
+                        return loadToVec2(_mm_mul_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_mul_ps(loadToSSERegister(static_cast<_vec2<float>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_mul_ps(loadToSSERegister(static_cast<_vec2<float_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
-                    if constexpr(std::is_same<_ArithmeticType, long>::value){
-                        return loadToVec2(_mm_mul_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<long>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value || std::is_same<_VectorType, int64_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
+                        return loadToVec2(_mm_mul_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<int64_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_mul_epi64(loadToSSERegister(static_cast<_vec2<long>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_mul_epi64(loadToSSERegister(static_cast<_vec2<int64_t>>(*this)), loadToSSERegister(t_other)));
                     }
                 }
             }
@@ -159,33 +159,33 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
         ARITHMETIC_TEMPLATE(_VectorType)
         _vec2 operator/(_vec2<_VectorType> t_other){
             if constexpr(std::is_same<_ArithmeticType, _VectorType>::value){
-                if constexpr(std::is_same<_ArithmeticType, int>::value){
-                    return _vec2<int>(this->x / t_other.x, this->y / t_other.y);
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value){
+                if constexpr(std::is_same<_ArithmeticType, int32_t>::value){
+                    return _vec2<int32_t>(this->x / t_other.x, this->y / t_other.y);
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
                     return loadToVec2(_mm_div_epi64(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value){
                     return loadToVec2(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(t_other)));
-                }else if constexpr(std::is_same<_ArithmeticType, double>::value){
+                }else if constexpr(std::is_same<_ArithmeticType, double_t>::value){
                     return loadToVec2(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(t_other)));
                 }
             }else{
-                if constexpr(std::is_same<_ArithmeticType, double>::value || std::is_same<_VectorType, double>::value){
-                    if constexpr(std::is_same<_ArithmeticType, double>::value){
-                        return loadToVec2(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double>>(t_other))));
+                if constexpr(std::is_same<_ArithmeticType, double_t>::value || std::is_same<_VectorType, double_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, double_t>::value){
+                        return loadToVec2(_mm_div_pd(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<double_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_div_pd(loadToSSERegister(static_cast<_vec2<double>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_div_pd(loadToSSERegister(static_cast<_vec2<double_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, float>::value || std::is_same<_VectorType, float>::value){
-                    if constexpr(std::is_same<_ArithmeticType, float>::value){
-                        return loadToVec2(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, float_t>::value || std::is_same<_VectorType, float_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, float_t>::value){
+                        return loadToVec2(_mm_div_ps(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<float_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_div_ps(loadToSSERegister(static_cast<_vec2<float>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_div_ps(loadToSSERegister(static_cast<_vec2<float_t>>(*this)), loadToSSERegister(t_other)));
                     }
-                }else if constexpr(std::is_same<_ArithmeticType, long>::value || std::is_same<_VectorType, long>::value){
-                    if constexpr(std::is_same<_ArithmeticType, long>::value){
-                        return loadToVec2(_mm_div_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<long>>(t_other))));
+                }else if constexpr(std::is_same<_ArithmeticType, int64_t>::value || std::is_same<_VectorType, int64_t>::value){
+                    if constexpr(std::is_same<_ArithmeticType, int64_t>::value){
+                        return loadToVec2(_mm_div_epi64(loadToSSERegister(*this), loadToSSERegister(static_cast<_vec2<int64_t>>(t_other))));
                     }else{
-                        return loadToVec2(_mm_div_epi64(loadToSSERegister(static_cast<_vec2<long>>(*this)), loadToSSERegister(t_other)));
+                        return loadToVec2(_mm_div_epi64(loadToSSERegister(static_cast<_vec2<int64_t>>(*this)), loadToSSERegister(t_other)));
                     }
                 }
             }
@@ -255,14 +255,14 @@ BEGIN_NAMESPACE_INTERNAL //This is done because nested namespaces have only been
             //Depending on the host system this will be SSE optimized.
             return std::sqrt(((*this) * (*this)).accumulate());
         }
-        constexpr _vec2<_ArithmeticType> normalize(){
+        constexpr _vec2<_ArithmeticType> normalise(){
             //Updated normalization function.
             //If the Host System supports SSE this will be optimized with said Instruction Set Extension.
             _ArithmeticType m_magnitude = this->getLength(); 
             return *this / _vec2<_ArithmeticType>{m_magnitude};
         }
         ARITHMETIC_TEMPLATE(_VectorType)
-        constexpr float dot(_vec2<_VectorType> t_other){
+        constexpr float_t dot(_vec2<_VectorType> t_other){
             //Due to Operator overloading this function is actually always exactly the same.
             return (*this * t_other).accumulate();
         }
