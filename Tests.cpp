@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "TriLib/vector/vector.hpp"
+#include "TriLib/vector/Vector.hpp"
 template<typename T>
 void testVector(){
     std::chrono::high_resolution_clock::time_point m_begin;
