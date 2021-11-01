@@ -7,13 +7,13 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/FindSSE.cmake)
 add_executable(TriLibTests ${CMAKE_CURRENT_SOURCE_DIR}/Tests.cpp)
 
 if(MSVC)
-    target_compile_options(TriLibTests PUBLIC /Wall)
+    target_compile_options(TriLibTests PUBLIC )
 else()
-    target_compile_options(TriLibTests PUBLIC -mavx -pedantic -fconcepts)
+    target_compile_options(TriLibTests PUBLIC -march=native -O3 -std=c++17 -pedantic)
 endif()
 
 
-target_include_directories(TriLibTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(TriLibTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include C:/Users/User3/Documents/cppprojects/FrostEngine/vendor/lunarg)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
